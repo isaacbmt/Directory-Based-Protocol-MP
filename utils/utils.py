@@ -7,7 +7,7 @@ def create_instruction(processorID):
     if instr_type == 0:
         return [processorID, 'READ', random.binomial(7, 0.5), 0]
     elif instr_type == 1:
-        return [processorID, 'WRITE', random.binomial(7, .7), random.binomial(512, 0.5)]
+        return [processorID, 'WRITE', random.binomial(7, .7), random.binomial(65535, 0.5)]
     else:
         return [processorID, 'CALC', 0, 0]
 

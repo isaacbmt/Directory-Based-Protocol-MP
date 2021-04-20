@@ -17,12 +17,10 @@ class CacheL1(Cache):
                 self.blocks[i].value = value
                 break
 
-    def set_new_value(self, addr, value):
-        if addr % 2 == 0:
-            self.blocks[0].state = 'S'
-            self.blocks[0].value = value
-            self.blocks[0].addr = addr
-        else:
-            self.blocks[1].state = 'S'
-            self.blocks[1].value = value
-            self.blocks[1].addr = addr
+    def set_new_value(self, addr, value, state):
+        block_num = addr % 2
+        for hierarchy in [0, 'I', 'S', 'M']:
+            if self.blocks[block_num].state == hierarchy:
+                self.blocks[block_num].state = state
+                self.blocks[block_num].value = value
+                self.blocks[block_num].addr = addr

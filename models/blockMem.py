@@ -6,4 +6,4 @@ class BlockMem(Block):
         super().__init__(addr, value)
 
     def get_block_information(self):
-        return [self.addr, self.value]
+        return [bin(self.addr), hex(self.value)]

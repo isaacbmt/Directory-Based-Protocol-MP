@@ -18,4 +18,4 @@ class BlockL2(Block):
         return self.owner_list
 
     def get_block_information(self):
-        return [self.block_number, self.state, str(self.owner_list), self.addr, self.value]
+        return [self.block_number, self.state, str(self.owner_list), bin(self.addr), hex(self.value)]

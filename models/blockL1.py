@@ -14,4 +14,4 @@ class BlockL1(Block):
         return self.state
 
     def get_block_information(self):
-        return [self.block_number, self.state, self.addr, self.value]
+        return [self.block_number, self.state, bin(self.addr), hex(self.value)]
