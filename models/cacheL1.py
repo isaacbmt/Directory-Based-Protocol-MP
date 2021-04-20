@@ -5,8 +5,8 @@ from models.blockL1 import BlockL1
 class CacheL1(Cache):
     def __init__(self):
         self.blocks = [
-            BlockL1(0, 0, 0, 0),
-            BlockL1(1, 0, 0, 0)
+            BlockL1(0, 'I', 0, 0),
+            BlockL1(1, 'I', 0, 0)
         ]
         super().__init__(self.blocks)
 
@@ -19,7 +19,7 @@ class CacheL1(Cache):
 
     def set_new_value(self, addr, value, state):
         block_num = addr % 2
-        for hierarchy in [0, 'I', 'S', 'M']:
+        for hierarchy in ['I', 'S', 'M']:
             if self.blocks[block_num].state == hierarchy:
                 self.blocks[block_num].state = state
                 self.blocks[block_num].value = value

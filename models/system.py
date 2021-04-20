@@ -1,10 +1,8 @@
 import time
-
-from models.processor import Processor
 from models.cacheL2 import CacheL2
 from models.memory import Memory
 from threading import Lock
-from msi import MSI
+from msi import MSI, Processor
 import logging
 
 
@@ -31,11 +29,11 @@ class System:
 
     def exe_instruction(self, id):
         logging.debug('Using thread')
-        # while True:
-        self.msi.execute_instruction(id)
+        while True:
+            self.msi.execute_instruction(id)
+            print(f'mem: { self.memory.get_information() }')
+            print(f'L2: { self.cache_l2.get_information() }')
 
-        print(f'mem: { self.memory.get_information() }')
-        print(f'L2: { self.cache_l2.get_information() }')
+
         # for proc in self.processors:
         #     print(f'P{proc.get_id()}: {proc.cacheL1.get_information()}')
-        time.sleep(2)

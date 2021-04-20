@@ -1,4 +1,5 @@
 from utils.utils import create_instruction, format_instruction
+from models.processor import Processor
 import time
 
 
@@ -33,7 +34,8 @@ class MSI:
 
     def write_l2(self, processorID, addr, val):
         isInCacheL2, stateL2 = self.system.cache_l2.find_address(addr)
-        print(f'before: {self.system.cache_l2.get_information()}')
+        print(f'before P{processorID}: {self.system.cache_l2.get_information()}')
+        self.write_mem(processorID, addr)
         if isInCacheL2:
             if stateL2 == 'DS':
                 print('ds')
@@ -57,7 +59,8 @@ class MSI:
                 self.system.processors[processorID].lock.release()
         else:
             self.system.processors[processorID].lock.acquire()
-            self.system.cache_l2.set_new_value(addr, val, 'DM')
+            old_addr = self.system.cache_l2.set_new_value(addr, val, 'DM')
+            self.flush_caches(processorID, old_addr)
             self.system.processors[processorID].lock.release()
         self.write_l1(processorID, addr, val)
 
@@ -92,7 +95,8 @@ class MSI:
         else:
             self.system.processors[processorID].lock.acquire()
             val = self.system.memory.get_val(addr)
-            self.system.cache_l2.set_new_value(addr, val, 'DS')
+            old_addr = self.system.cache_l2.set_new_value(addr, val, 'DS')
+            self.flush_caches(processorID, old_addr)
             self.system.processors[processorID].lock.release()
             self.read_l1(processorID, addr, val)
 
@@ -117,11 +121,20 @@ class MSI:
             self.system.processors[processorID].cacheL1.set_new_value(addr, value, 'M')
         self.finish(processorID)
 
+    def write_mem(self, processorID, addr):
+        for i in range(len(self.system.processors)):
+            if self.system.processors[i].get_id() != processorID:
+                isInCacheL1, stateL1 = self.system.processors[i].cacheL1.find_address(addr)
+                if isInCacheL1 and stateL1 == 'M':
+                    val = self.system.cache_l2.get_val(addr)
+                    self.system.memory.set_value(addr, val)
+                    return
+
     def write_bus_flush(self, processorID, addr):
         for i in range(len(self.system.processors)):
             if self.system.processors[i].get_id() != processorID:
                 isInCacheL1, stateL1 = self.system.processors[i].cacheL1.find_address(addr)
-                if isInCacheL1 and stateL1 == 'S':
+                if isInCacheL1 and (stateL1 == 'S' or stateL1 == 'M'):
                     self.system.processors[i].cacheL1.set_state(addr, 'I')
 
     def read_l1(self, processorID, addr, value):
@@ -148,6 +161,11 @@ class MSI:
                 if isInCacheL1 and stateL1 == 'M':
                     self.system.processors[i].cacheL1.set_state(addr, 'S')
 
+    def flush_caches(self, processorID, addr):
+        for i in range(len(self.system.processors)):
+            if self.system.processors[i] != processorID:
+                self.system.processors[i].cacheL1.set_state(addr, 'I')
+
     def finish(self, processorID):
         print(f'Processor: {processorID} finished an execution')
-        time.sleep(2)
+        time.sleep(3)

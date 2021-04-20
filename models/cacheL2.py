@@ -6,10 +6,10 @@ from numpy import random
 class CacheL2(Cache):
     def __init__(self):
         self.blocks = [
-            BlockL2(0, 0, [], 0, 0),
-            BlockL2(1, 0, [], 0, 0),
-            BlockL2(2, 0, [], 0, 0),
-            BlockL2(3, 0, [], 0, 0)
+            BlockL2(0, 'DI', [], 0, 0),
+            BlockL2(1, 'DI', [], 0, 0),
+            BlockL2(2, 'DI', [], 0, 0),
+            BlockL2(3, 'DI', [], 0, 0)
         ]
         super().__init__(self.blocks)
 
@@ -32,7 +32,7 @@ class CacheL2(Cache):
                         self.blocks[replace_block].state = state
                         self.blocks[replace_block].value = value
                         self.blocks[replace_block].addr = addr
-                        break
+                        return self.blocks[replace_block].addr
 
     def get_blocks_by_state(self, state):
         indexes = []
