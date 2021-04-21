@@ -21,7 +21,7 @@ class CacheL2(Cache):
                 break
 
     def set_value(self, addr, value, state):
-        time.sleep(1)
+        time.sleep(0.3)
         for i in range(len(self.blocks)):
             if self.blocks[i].addr == addr:
                 self.blocks[i].state = state
@@ -29,7 +29,7 @@ class CacheL2(Cache):
                 break
 
     def set_new_value(self, addr, value, state):
-        time.sleep(1.5)
+        time.sleep(0.4)
         for hierarchy in ['DI', 'DS', 'DM']:
             blocks_indexes = self.get_blocks_by_state(hierarchy)
             while blocks_indexes:

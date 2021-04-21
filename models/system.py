@@ -9,10 +9,10 @@ import logging
 class System:
     def __init__(self, cache_l2: CacheL2, memory: Memory, lock: Lock):
         self.lock = lock
-        self.processors = [Processor(0, lock, self.exe_instruction, [], 0),
-                           Processor(1, lock, self.exe_instruction, [], 0),
-                           Processor(2, lock, self.exe_instruction, [], 0),
-                           Processor(3, lock, self.exe_instruction, [], 0)]
+        self.processors = [Processor(0, lock, self.exe_instruction, [], 0, []),
+                           Processor(1, lock, self.exe_instruction, [], 0, []),
+                           Processor(2, lock, self.exe_instruction, [], 0, []),
+                           Processor(3, lock, self.exe_instruction, [], 0, [])]
         self.cache_l2 = cache_l2
         self.pause = True
         self.run_mode = 'step'

@@ -43,6 +43,7 @@ class MSI:
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
             elif stateL2 == 'DI':
+                print(f'P{processorID} Cache L2: WRITE MISS')
                 self.system.processors[processorID].lock.acquire()
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
@@ -79,6 +80,7 @@ class MSI:
                 self.system.processors[processorID].lock.release()
                 self.read_l1(processorID, addr, val)
             elif stateL2 == 'DI':
+                print(f'P{processorID} Cache L2: READ MISS')
                 self.system.processors[processorID].lock.acquire()
                 val = self.system.memory.get_val(addr)
                 self.system.cache_l2.set_value(addr, val, 'DS')
@@ -109,7 +111,11 @@ class MSI:
         self.write_bus_flush(processorID, addr)
         isInCacheL1, stateL1 = self.system.processors[processorID].cacheL1.find_address(addr)
         if isInCacheL1:
-            self.system.processors[processorID].cacheL1.set_value(addr, value, 'M')
+            if stateL1 == 'I':
+                print(f'P{processorID} Cache L1: WRITE MISS')
+                self.system.processors[processorID].cacheL1.set_value(addr, value, 'M')
+            else:
+                self.system.processors[processorID].cacheL1.set_value(addr, value, 'M')
         else:
             print(f'P{processorID} Cache L1: WRITE MISS')
             old_addr, old_val, old_state = self.system.processors[processorID].cacheL1.set_new_value(addr, value, 'M')
@@ -122,6 +128,7 @@ class MSI:
         self.system.lock.release()
         self.system.processors[processorID].executed = True
         self.set_owners(processorID)
+        self.system.processors[processorID].instruction_old = self.system.processors[processorID].instruction
         self.finish(processorID)
 
     def write_mem(self, processorID, addr):
@@ -150,6 +157,7 @@ class MSI:
             elif stateL1 == 'M':
                 self.system.processors[processorID].cacheL1.set_state(addr, 'M')
             elif stateL1 == 'I':
+                print(f'P{processorID} Cache L1: READ MISS')
                 self.system.processors[processorID].cacheL1.set_value(addr, value, 'S')
             else:
                 self.system.processors[processorID].cacheL1.set_value(addr, value, 'S')
@@ -166,6 +174,7 @@ class MSI:
         self.system.lock.release()
         self.system.processors[processorID].executed = True
         self.set_owners(processorID)
+        self.system.processors[processorID].instruction_old = self.system.processors[processorID].instruction
         self.finish(processorID)
 
     def read_bus_flush(self, processorID, addr):

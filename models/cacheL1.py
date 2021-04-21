@@ -13,7 +13,7 @@ class CacheL1(Cache):
         super().__init__(self.blocks)
 
     def set_value(self, addr, value, state):
-        time.sleep(0.25)
+        time.sleep(0.1)
         for i in range(len(self.blocks)):
             if self.blocks[i].addr == addr:
                 self.blocks[i].state = state
@@ -21,7 +21,7 @@ class CacheL1(Cache):
                 break
 
     def set_new_value(self, addr, value, state):
-        time.sleep(0.5)
+        time.sleep(0.15)
         block_num = addr % 2
         for hierarchy in ['I', 'S', 'M']:
             if self.blocks[block_num].state == hierarchy:

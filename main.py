@@ -81,6 +81,16 @@ def run_gui():
     ins3_label.place(x=490, y=30)
     ins4_label = Label(root, text='')
     ins4_label.place(x=720, y=30)
+
+    ins1_old_label = Label(root, text='')
+    ins1_old_label.place(x=30, y=2)
+    ins2_old_label = Label(root, text='')
+    ins2_old_label.place(x=260, y=2)
+    ins3_old_label = Label(root, text='')
+    ins3_old_label.place(x=490, y=2)
+    ins4_old_label = Label(root, text='')
+    ins4_old_label.place(x=720, y=2)
+
     pause_label = Label(root, text='', font='times 24')
     pause_label.place(x=100, y=230)
     while system.run_while:
@@ -94,6 +104,16 @@ def run_gui():
             ins3_label.config(text=format_instruction(system.processors[2].instruction))
         if system.processors[3].instruction:
             ins4_label.config(text=format_instruction(system.processors[3].instruction))
+
+        if system.processors[0].instruction_old:
+            ins1_old_label.config(text=format_instruction(system.processors[0].instruction_old))
+        if system.processors[1].instruction_old:
+            ins2_old_label.config(text=format_instruction(system.processors[1].instruction_old))
+        if system.processors[2].instruction_old:
+            ins3_old_label.config(text=format_instruction(system.processors[2].instruction_old))
+        if system.processors[3].instruction_old:
+            ins4_old_label.config(text=format_instruction(system.processors[3].instruction_old))
+
         create_table(10, 10, 'Procesador 0', system.processors[0].cacheL1.get_information(), 200, (10, 50), root)
         create_table(10, 10, 'Procesador 1', system.processors[1].cacheL1.get_information(), 200, (240, 50), root)
         create_table(10, 10, 'Procesador 2', system.processors[2].cacheL1.get_information(), 200, (470, 50), root)
