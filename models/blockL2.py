@@ -2,7 +2,7 @@ from models.block import Block
 
 
 class BlockL2(Block):
-    def __init__(self, block_number, state, owner_list, addr, value):
+    def __init__(self, block_number, state, owner_list: list, addr: int, value: int):
         super().__init__(addr, value)
         self.block_number = block_number
         self.state = state

@@ -1,5 +1,6 @@
 from models.cache import Cache
 from models.blockL2 import BlockL2
+import time
 from numpy import random
 
 
@@ -13,6 +14,12 @@ class CacheL2(Cache):
         ]
         super().__init__(self.blocks)
 
+    def append_owners(self, addr, processorID):
+        for i in range(len(self.blocks)):
+            if self.blocks[i].addr == addr:
+                self.blocks[i].owner_list.append(processorID)
+                break
+
     def set_value(self, addr, value, state):
         for i in range(len(self.blocks)):
             if self.blocks[i].addr == addr:
@@ -21,18 +28,22 @@ class CacheL2(Cache):
                 break
 
     def set_new_value(self, addr, value, state):
-        for hierarchy in [0, 'DI', 'DS', 'DM']:
+        for hierarchy in ['DI', 'DS', 'DM']:
             blocks_indexes = self.get_blocks_by_state(hierarchy)
-            if blocks_indexes:
-                while blocks_indexes:
-                    rand = random.binomial(len(blocks_indexes) - 1, 0.5)
-                    replace_block = blocks_indexes[rand]
-                    blocks_indexes.pop(rand)
-                    if replace_block % 2 == addr % 2:
-                        self.blocks[replace_block].state = state
-                        self.blocks[replace_block].value = value
-                        self.blocks[replace_block].addr = addr
-                        return self.blocks[replace_block].addr
+            while blocks_indexes:
+                rand = random.binomial(len(blocks_indexes) - 1, 0.5)
+                replace_block = blocks_indexes[rand]
+                blocks_indexes.pop(rand)
+                if replace_block % 2 == addr % 2:
+                    old_addr = self.blocks[replace_block].addr
+                    old_val = self.blocks[replace_block].value
+                    self.blocks[replace_block].state = state
+                    self.blocks[replace_block].value = value
+                    self.blocks[replace_block].addr = addr
+                    if hierarchy != 'DI':
+                        return [old_addr, old_val]
+                    else:
+                        return -1, -1
 
     def get_blocks_by_state(self, state):
         indexes = []

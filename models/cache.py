@@ -6,7 +6,7 @@ class Cache:
         for block in self.blocks:
             if block.addr == addr:
                 return [True, block.state]
-        return [False, 0]
+        return [False, -1]
 
     def set_state(self, addr, state):
         for i in range(len(self.blocks)):

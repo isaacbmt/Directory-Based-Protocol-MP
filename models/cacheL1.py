@@ -21,6 +21,13 @@ class CacheL1(Cache):
         block_num = addr % 2
         for hierarchy in ['I', 'S', 'M']:
             if self.blocks[block_num].state == hierarchy:
+                old_addr = self.blocks[block_num].addr
+                old_val = self.blocks[block_num].value
+                old_state = self.blocks[block_num].state
                 self.blocks[block_num].state = state
                 self.blocks[block_num].value = value
                 self.blocks[block_num].addr = addr
+                if hierarchy == 'M':
+                    return [old_addr, old_val, old_state]
+                else:
+                    return [-1, -1, -1]
