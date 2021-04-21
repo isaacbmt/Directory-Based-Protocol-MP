@@ -15,11 +15,9 @@ class Processor(Thread):
         self.mode = mode
         self.step = False
 
-
     def run(self):
         # self.lock.acquire()
         self.target(self.id)
-        print(f'P{self.id}:\n {self.cacheL1.get_information()[0]}\n {self.cacheL1.get_information()[1]}', '\n')
         # self.lock.release()
 
     def get_id(self):

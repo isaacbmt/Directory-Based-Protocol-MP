@@ -14,11 +14,8 @@ class MSI:
 
     def continuous_mode(self, processorID):
         if self.system.processors[processorID].mode == 0 and not self.system.processors[processorID].executed:
-            print(f'ejecuto cococo: {self.system.processors[processorID].instruction}')
             self.system.processors[processorID].executed = False
             self.system.processors[processorID].instruction = create_instruction(processorID)
-        else:
-            print(f'ejecuto lololo: {self.system.processors[processorID].instruction}')
 
     def execute_instruction(self, processorID):
         self.continuous_mode(processorID)
@@ -26,42 +23,35 @@ class MSI:
             return self.finish(processorID)
 
         pid, instr_type, addr, val = self.system.processors[processorID].instruction
-        # self.system.processors[processorID].instruction = self.current_instruction
-        print(f'P{processorID} ejecuta: {format_instruction(self.system.processors[processorID].instruction)}')
         if instr_type == 'READ':
             self.read_l2(processorID, addr)
         elif instr_type == 'WRITE':
             self.write_l2(processorID, addr, val)
         else:
-            print('Estoy ejecutando un CALC')
             self.finish(processorID)
 
     def write_l2(self, processorID, addr, val):
         isInCacheL2, stateL2 = self.system.cache_l2.find_address(addr)
-        print(f'before P{processorID}: {self.system.cache_l2.get_information()}')
         self.write_mem(processorID, addr)
         if isInCacheL2:
             if stateL2 == 'DS':
-                print('ds')
                 self.system.processors[processorID].lock.acquire()
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
             elif stateL2 == 'DM':
-                print('dm')
                 self.system.processors[processorID].lock.acquire()
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
             elif stateL2 == 'DI':
-                print('di')
                 self.system.processors[processorID].lock.acquire()
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
             else:
-                print('else')
                 self.system.processors[processorID].lock.acquire()
                 self.system.cache_l2.set_value(addr, val, 'DM')
                 self.system.processors[processorID].lock.release()
         else:
+            print(f'P{processorID} Cache L2: WRITE MISS')
             self.system.processors[processorID].lock.acquire()
             old_addr, old_val = self.system.cache_l2.set_new_value(addr, val, 'DM')
             # isInCacheL2Old, stateL2Old = self.system.cache_l2.find_address(old_addr)
@@ -77,13 +67,11 @@ class MSI:
         isInCacheL2, stateL2 = self.system.cache_l2.find_address(addr)
         if isInCacheL2:
             if stateL2 == 'DS':
-                print('Share')
                 self.system.processors[processorID].lock.acquire()
                 val = self.system.cache_l2.get_val(addr)
                 self.system.processors[processorID].lock.release()
                 self.read_l1(processorID, addr, val)
             elif stateL2 == 'DM':
-                print('Modify')
                 self.system.processors[processorID].lock.acquire()
                 val = self.system.cache_l2.get_val(addr)
                 self.system.memory.set_value(addr, val)
@@ -91,14 +79,12 @@ class MSI:
                 self.system.processors[processorID].lock.release()
                 self.read_l1(processorID, addr, val)
             elif stateL2 == 'DI':
-                print('Invalid')
                 self.system.processors[processorID].lock.acquire()
                 val = self.system.memory.get_val(addr)
                 self.system.cache_l2.set_value(addr, val, 'DS')
                 self.system.processors[processorID].lock.release()
                 self.read_l1(processorID, addr, val)
             else:
-                print('New value')
                 self.system.processors[processorID].lock.acquire()
                 val = self.system.memory.get_val(addr)
                 self.system.cache_l2.set_value(addr, val, 'DS')
@@ -106,6 +92,7 @@ class MSI:
                 self.read_l1(processorID, addr, val)
         else:
             self.system.processors[processorID].lock.acquire()
+            print(f'P{processorID} Cache L2: READ MISS')
             val = self.system.memory.get_val(addr)
             old_addr, old_val = self.system.cache_l2.set_new_value(addr, val, 'DS')
             # isInCacheL2Old, stateL2Old = self.system.cache_l2.find_address(old_addr)
@@ -124,6 +111,7 @@ class MSI:
         if isInCacheL1:
             self.system.processors[processorID].cacheL1.set_value(addr, value, 'M')
         else:
+            print(f'P{processorID} Cache L1: WRITE MISS')
             old_addr, old_val, old_state = self.system.processors[processorID].cacheL1.set_new_value(addr, value, 'M')
             if old_state == 'M':
                 self.system.memory.set_value(old_addr, old_val)
@@ -155,7 +143,6 @@ class MSI:
     def read_l1(self, processorID, addr, value):
         # time.sleep(1)
         self.read_bus_flush(processorID, addr)
-        print(f'P{processorID}: direecion: {addr}')
         isInCacheL1, stateL1 = self.system.processors[processorID].cacheL1.find_address(addr)
         if isInCacheL1:
             if stateL1 == 'S':
@@ -167,6 +154,7 @@ class MSI:
             else:
                 self.system.processors[processorID].cacheL1.set_value(addr, value, 'S')
         else:
+            print(f'P{processorID} Cache L1: READ MISS')
             old_addr, old_val, old_state = self.system.processors[processorID].cacheL1.set_new_value(addr, value, 'S')
             if old_state == 'M':
                 self.system.memory.set_value(old_addr, old_val)
@@ -205,22 +193,17 @@ class MSI:
         self.system.processors[processorID].lock.release()
 
     def finish(self, processorID):
-        print(f'Contador: {self.system.counter}, modo: {self.system.processors[processorID].mode}, '
-              f'instr: {self.system.processors[processorID].instruction}')
         self.system.lock.acquire()
         chosen_var = self.system.chosen_cpu
         self.system.lock.release()
         if self.system.run_mode == 'step' \
                 and chosen_var == processorID \
                 and self.system.processors[processorID].mode == 1:
-            print(f'P{processorID}: stooop chosen')
             self.system.resume_stop()
         elif self.system.run_mode == 'step' \
                 and self.system.counter == 4 \
                 and self.system.processors[processorID].mode == 0:
-            print(f'P{processorID}: stooop counter')
             self.system.resume_stop()
         elif self.system.run_mode == 'continuous':
             self.system.processors[processorID].executed = False
-        print(f'Processor: {processorID} finished an execution')
         time.sleep(1)

@@ -42,9 +42,6 @@ def run_gui():
     value.place(x=310, y=470, width=100)
 
     def send_instruction(processorID, type, addr, val):
-        print("------------")
-        print(processorID)
-        print("------------")
         processorID = int(processorID[1:])
         # system.lock.acquire()
         system.processors[processorID].instruction = [processorID, type, addr, val]
@@ -53,7 +50,6 @@ def run_gui():
         # system.lock.release()
         system.resume_stop_button(1, 'step', True)
         # value.delete('0', 'end')
-        print(f'send: {format_instruction([processorID, type, addr, val])}')
 
     execute = Button(root,
                      text='Run',
@@ -74,6 +70,9 @@ def run_gui():
                                command=lambda: system.resume_stop_button(0, 'continuous', False))
     continuous_button.place(x=570, y=470)
 
+    stop_while_button = Button(root, text='Exit', command=system.end)
+    stop_while_button.place(x=840, y=470)
+
     ins1_label = Label(root, text='')
     ins1_label.place(x=30, y=30)
     ins2_label = Label(root, text='')
@@ -84,7 +83,7 @@ def run_gui():
     ins4_label.place(x=720, y=30)
     pause_label = Label(root, text='', font='times 24')
     pause_label.place(x=100, y=230)
-    while True:
+    while system.run_while:
         lock.acquire()
         pause_label.config(text='Pause' if system.pause else '')
         if system.processors[0].instruction:
@@ -119,4 +118,4 @@ s = input('ff: ')
 for i in range(len(system.processors)):
     system.processors[i].join()
 
-# interface.join()
+interface.join()

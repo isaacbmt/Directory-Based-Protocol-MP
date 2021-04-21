@@ -1,5 +1,6 @@
 from models.blockMem import BlockMem
 from models.cache import Cache
+import time
 
 
 class Memory(Cache):
@@ -17,11 +18,13 @@ class Memory(Cache):
         super().__init__(self.blocks)
 
     def get_val(self, addr):
+        time.sleep(1.5)
         for block in self.blocks:
             if addr == block.addr:
                 return block.value
 
     def set_value(self, addr, value):
+        time.sleep(2)
         for i in range(len(self.blocks)):
             if self.blocks[i].addr == addr:
                 self.blocks[i].value = value

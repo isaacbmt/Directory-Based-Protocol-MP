@@ -20,6 +20,7 @@ class System:
         self.msi = MSI(self)
         self.counter = 0
         self.chosen_cpu = None
+        self.run_while = True
 
     def start(self):
         for i in range(len(self.processors)):
@@ -36,6 +37,9 @@ class System:
 
             # self.processors[i].lock.release()
 
+    def end(self):
+        self.run_while = False
+
     def pause_processors(self, id):
         self.processors[id].step = True
 
@@ -50,14 +54,8 @@ class System:
 
     def exe_instruction(self, id):
         logging.debug('Using thread')
-        while True:
+        while self.run_while:
             if not self.pause:
                 self.msi.execute_instruction(id)
-                print(f'mem: { self.memory.get_information() }')
-                print(f'L2: { self.cache_l2.get_information() }')
             else:
                 time.sleep(1)
-
-
-        # for proc in self.processors:
-        #     print(f'P{proc.get_id()}: {proc.cacheL1.get_information()}')
